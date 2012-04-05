@@ -21,10 +21,23 @@ Copyright (C) 2012 <Heinrich Schmidt>
 
 __verion__ = "0.01"
 
+import sys
 import email
+import rss #http://znasibov.info/blog/post/rss-py.html
+from datetime import datetime
 
-msg = email.message_from_file("test.mail")
+f = sys.stdin
+msg = email.message_from_file(f)
+mail_content = msg.get_payload()
+subject = msg.get('Subject')
+f.close()
 
-x = 'test'
 
-print(x)
+channel = rss.Channel('Testfeed', 'http://ktrask.de/test.rss', 'This is my simple test feed', generator = 'rss.py', pubdate = datetime.now(), language = 'de-DE')
+
+item1 = rss.Item(channel, subject, '', mail_content, pubdate = datetime.now())
+
+channel.additem(item1)
+print(channel.toprettyxml())
+
+
