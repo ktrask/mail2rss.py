@@ -34,7 +34,7 @@ subject = msg.get('Subject')
 f.close()
 
 try:
-  pickleFile = open("testfile.dump", 'rb')
+  pickleFile = open("object.dump", 'rb')
 except: 
   channel = rss.Channel('Testfeed', 'http://ktrask.de/test.rss', 'This is my simple test feed', generator = 'rss.py', pubdate = datetime.now(), language = 'de-DE')
 else:
@@ -42,15 +42,11 @@ else:
   pickleFile.close()
 
 item1 = rss.Item(channel, subject, '', mail_content, pubdate = datetime.now())
-item2 = rss.Item(channel, subject, '', "content", pubdate = datetime.now())
 
 channel.additem(item1)
-channel.additem(item2)
 print(channel.toprettyxml())
 
-
-
-pickleFile = open("testfile.dump", 'wb')
+pickleFile = open("object.dump", 'wb')
 ll = pickle.dumps(channel)
 pickleFile.write(ll)
 pickleFile.close()
