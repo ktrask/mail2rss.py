@@ -19,12 +19,13 @@ Copyright (C) 2012 <Heinrich Schmidt>
 """
 
 
-__verion__ = "0.01"
+__version__ = "0.02"
 
 import sys
 import email
 import rss #http://znasibov.info/blog/post/rss-py.html
 from datetime import datetime
+import pickle
 
 f = sys.stdin
 msg = email.message_from_file(f)
@@ -32,12 +33,24 @@ mail_content = msg.get_payload()
 subject = msg.get('Subject')
 f.close()
 
-
-channel = rss.Channel('Testfeed', 'http://ktrask.de/test.rss', 'This is my simple test feed', generator = 'rss.py', pubdate = datetime.now(), language = 'de-DE')
+try:
+  pickleFile = open("testfile.dump", 'rb')
+except: 
+  channel = rss.Channel('Testfeed', 'http://ktrask.de/test.rss', 'This is my simple test feed', generator = 'rss.py', pubdate = datetime.now(), language = 'de-DE')
+else:
+  channel = pickle.load(pickleFile)
+  pickleFile.close()
 
 item1 = rss.Item(channel, subject, '', mail_content, pubdate = datetime.now())
+item2 = rss.Item(channel, subject, '', "content", pubdate = datetime.now())
 
 channel.additem(item1)
+channel.additem(item2)
 print(channel.toprettyxml())
 
 
+
+pickleFile = open("testfile.dump", 'wb')
+ll = pickle.dumps(channel)
+pickleFile.write(ll)
+pickleFile.close()
