@@ -26,24 +26,52 @@ import email
 import rss #http://znasibov.info/blog/post/rss-py.html
 from datetime import datetime
 import pickle
+import poplib
+import re
+#import unicode
 
+mailBox = poplib.POP3('pop3.example.com')
+mailBox.user('user')
+mailBox.pass_('password')
+
+feedTitle = "Testfeed"
+feedURL   = "http://example.com/test.rss"
+feedDiscr = "This is my simple test feed"
+feedLang  = "de-DE"
+
+numMessages = len(mailBox.list()[1])
+#ll = 0
+#ss = ""
+#  for j in ll:
+#    #ss = re.sub("xb'","",j.toString)
+#    ss += j.decode("utf-8")
+#    print(j)
+
+#print(ll)
 f = sys.stdin
-msg = email.message_from_file(f)
-mail_content = msg.get_payload()
-subject = msg.get('Subject')
+#msg = email.message_from_file(f)]
 f.close()
 
-try:
-  pickleFile = open("object.dump", 'rb')
-except: 
-  channel = rss.Channel('Testfeed', 'http://ktrask.de/test.rss', 'This is my simple test feed', generator = 'rss.py', pubdate = datetime.now(), language = 'de-DE')
-else:
-  channel = pickle.load(pickleFile)
-  pickleFile.close()
+#try:
+#  pickleFile = open("object.dump", 'rb')
+#except: 
+channel = rss.Channel(feedTitle, feedURL, feedDiscr, generator = 'rss.py', pubdate = datetime.now(), language = feedLang)
+#else:
+#  channel = pickle.load(pickleFile)
+#  pickleFile.close()
 
-item1 = rss.Item(channel, subject, '', mail_content, pubdate = datetime.now())
+for i in range(numMessages):
+  mailbytes = mailBox.retr(i+1)[1]
+  mail = b'\n'.join(mailbytes)
+  msg = email.message_from_bytes(mail)
+  mail_content = msg.get_payload(decode=1)
+  subject = msg.get('Subject')
+  item = rss.Item(channel, subject, '', mail_content.decode(), pubdate = datetime.now())
+  channel.additem(item)
 
-channel.additem(item1)
+
+mailBox.quit()
+
 print(channel.toprettyxml())
 
 pickleFile = open("object.dump", 'wb')
